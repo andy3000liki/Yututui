@@ -28,7 +28,7 @@ use crate::remote;
 use crate::remote::proto::InstanceFile;
 use crate::t;
 
-pub const ALREADY_RUNNING_NOTICE: &str = "ytt is already running.\n  \
+pub const ALREADY_RUNNING_NOTICE: &str = "better-ytt is already running.\n  \
                                           Control it:  ytt -r <command>   (e.g. `ytt -r pp`, `ytt -r next`)\n  \
                                           Stop it:     ytt -r quit";
 
@@ -250,9 +250,9 @@ mod tests {
     #[test]
     fn already_running_notice_keeps_controls_without_advertising_new_instance() {
         assert!(ALREADY_RUNNING_NOTICE.contains("Control it:"));
-        assert!(ALREADY_RUNNING_NOTICE.contains("ytt -r <command>"));
+        assert!(ALREADY_RUNNING_NOTICE.contains("better-ytt -r <command>"));
         assert!(ALREADY_RUNNING_NOTICE.contains("Stop it:"));
-        assert!(ALREADY_RUNNING_NOTICE.contains("ytt -r quit"));
+        assert!(ALREADY_RUNNING_NOTICE.contains("better-ytt -r quit"));
         assert!(!ALREADY_RUNNING_NOTICE.contains("--new-instance"));
     }
 

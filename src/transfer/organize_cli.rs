@@ -21,12 +21,12 @@ pub fn run(args: &[&str]) -> i32 {
     match run_inner(args) {
         Ok(()) => EXIT_OK,
         Err(OrganizeCliError::Usage(message)) => {
-            eprintln!("ytt transfer organize: {message}");
+            eprintln!("better-ytt transfer organize: {message}");
             eprintln!("{USAGE}");
             EXIT_USAGE
         }
         Err(OrganizeCliError::Other(error)) => {
-            eprintln!("ytt transfer organize: {error:#}");
+            eprintln!("better-ytt transfer organize: {error:#}");
             EXIT_FAILED
         }
     }

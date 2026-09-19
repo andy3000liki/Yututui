@@ -415,7 +415,7 @@ mod tests {
             PersonalDataExportStatus::Failed
         );
         assert!(app.status.text.contains("실행 중인 ytt를 닫은 뒤"));
-        assert!(app.status.text.contains("ytt data export"));
+        assert!(app.status.text.contains("better-ytt data export"));
         let response = response.try_recv().expect("immediate rejection reply");
         assert!(!response.ok);
         assert_eq!(

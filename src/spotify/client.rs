@@ -902,7 +902,7 @@ mod tests {
         assert!(
             SpotifyError::Auth("expired".to_owned())
                 .to_string()
-                .contains("ytt auth spotify")
+                .contains("better-ytt auth spotify")
         );
         assert!(
             SpotifyError::NotAllowlisted

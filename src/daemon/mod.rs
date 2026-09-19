@@ -138,7 +138,7 @@ pub fn run_cli(args: &[String]) -> i32 {
             return EXIT_OK;
         }
         Err(ParseOutcome::Invalid(message)) => {
-            eprintln!("ytt daemon: {message}");
+            eprintln!("better-ytt daemon: {message}");
             return EXIT_USAGE;
         }
     };
@@ -183,7 +183,7 @@ async fn start_cli(resume: bool) -> i32 {
             EXIT_OK
         }
         Err(e) => {
-            eprintln!("ytt daemon: {e}");
+            eprintln!("better-ytt daemon: {e}");
             daemon_error_exit_code(&e)
         }
     }
@@ -231,7 +231,7 @@ async fn serve(_from_tray: bool, resume: bool) -> i32 {
     };
     let engine = transport_or_return!(engine);
     if resume && engine.status().title.is_none() {
-        eprintln!("ytt daemon: resume rejected: session_empty");
+        eprintln!("better-ytt daemon: resume rejected: session_empty");
         return EXIT_USAGE;
     }
     // Logging creates cache artifacts, so it begins only after every durable store has passed
@@ -730,7 +730,7 @@ async fn status(json: bool) -> i32 {
     let response = match client::send(RemoteCommand::Status).await {
         Ok(response) => response,
         Err(e) => {
-            eprintln!("ytt daemon: {}", e.human_message());
+            eprintln!("better-ytt daemon: {}", e.human_message());
             return EXIT_TRANSPORT;
         }
     };
@@ -739,7 +739,7 @@ async fn status(json: bool) -> i32 {
         match serde_json::to_string(&response) {
             Ok(line) => println!("{line}"),
             Err(e) => {
-                eprintln!("ytt daemon: could not encode status: {e}");
+                eprintln!("better-ytt daemon: could not encode status: {e}");
                 return EXIT_TRANSPORT;
             }
         }
@@ -763,7 +763,7 @@ async fn stop_cli() -> i32 {
             EXIT_OK
         }
         Err(e) => {
-            eprintln!("ytt daemon: {e}");
+            eprintln!("better-ytt daemon: {e}");
             daemon_error_exit_code(&e)
         }
     }

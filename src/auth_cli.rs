@@ -24,7 +24,7 @@ pub fn run(args: &[String]) -> i32 {
             if args.is_empty() { EXIT_USAGE } else { 0 }
         }
         Some(other) => {
-            eprintln!("ytt auth: unknown service `{other}`");
+            eprintln!("better-ytt auth: unknown service `{other}`");
             eprintln!("{USAGE}");
             EXIT_USAGE
         }

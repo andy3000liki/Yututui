@@ -22,7 +22,7 @@ impl fmt::Display for ControlError {
             ControlError::NotRunning => write!(f, "YuTuTui! is not running"),
             ControlError::StaleInstance => write!(f, "the saved YuTuTui! instance is stale"),
             ControlError::Rejected(reason) => write!(f, "command rejected: {reason}"),
-            ControlError::MissingStatus => write!(f, "ytt returned success without a status body"),
+            ControlError::MissingStatus => write!(f, "better-ytt returned success without a status body"),
             ControlError::Transport(msg) => write!(f, "{msg}"),
         }
     }

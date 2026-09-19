@@ -17,12 +17,12 @@ pub fn run(args: &[&str]) -> i32 {
             EXIT_OK
         }
         Err(ReportError::Usage(message)) => {
-            eprintln!("ytt transfer report: {message}");
+            eprintln!("better-ytt transfer report: {message}");
             eprintln!("{USAGE}");
             EXIT_USAGE
         }
         Err(ReportError::Failed(error)) => {
-            eprintln!("ytt transfer report: {error:#}");
+            eprintln!("better-ytt transfer report: {error:#}");
             EXIT_FAILED
         }
     }

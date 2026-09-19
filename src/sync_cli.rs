@@ -118,7 +118,7 @@ pub fn run(args: &[String]) -> i32 {
     match result {
         Ok(()) => EXIT_OK,
         Err(error) => {
-            eprintln!("ytt sync: {error}");
+            eprintln!("better-ytt sync: {error}");
             EXIT_RUNTIME
         }
     }
@@ -939,7 +939,7 @@ fn usage_error(message: &str) -> i32 {
         print!("{SYNC_USAGE}");
         EXIT_OK
     } else {
-        eprintln!("ytt sync: {message}\n\n{SYNC_USAGE}");
+        eprintln!("better-ytt sync: {message}\n\n{SYNC_USAGE}");
         EXIT_USAGE
     }
 }

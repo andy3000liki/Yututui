@@ -79,7 +79,7 @@ fn runtime() -> Option<tokio::runtime::Runtime> {
     {
         Ok(rt) => Some(rt),
         Err(e) => {
-            eprintln!("ytt transfer: could not start runtime: {e}");
+            eprintln!("better-ytt transfer: could not start runtime: {e}");
             None
         }
     }
@@ -92,7 +92,7 @@ pub fn run(args: &[String]) -> i32 {
             Some("spotify") => runtime().map_or(EXIT_FAILED, |rt| rt.block_on(list_spotify())),
             Some("ytm") => runtime().map_or(EXIT_FAILED, |rt| rt.block_on(list_ytm())),
             _ => {
-                eprintln!("ytt transfer list: expected `spotify` or `ytm`");
+                eprintln!("better-ytt transfer list: expected `spotify` or `ytm`");
                 EXIT_USAGE
             }
         },
@@ -101,7 +101,7 @@ pub fn run(args: &[String]) -> i32 {
         Some("session") => match it.next() {
             Some(job_id) => show_session(job_id),
             None => {
-                eprintln!("ytt transfer session: missing <JOB-ID> (see `ytt transfer sessions`)");
+                eprintln!("better-ytt transfer session: missing <JOB-ID> (see `ytt transfer sessions`)");
                 EXIT_USAGE
             }
         },
@@ -128,7 +128,7 @@ pub fn run(args: &[String]) -> i32 {
                     rt.block_on(execute_new(spec, yes, "sp2yt"))
                 }),
                 Err(msg) => {
-                    eprintln!("ytt transfer import: {msg}");
+                    eprintln!("better-ytt transfer import: {msg}");
                     EXIT_USAGE
                 }
             }
@@ -140,7 +140,7 @@ pub fn run(args: &[String]) -> i32 {
                     rt.block_on(execute_new(spec, yes, "yt2sp"))
                 }),
                 Err(msg) => {
-                    eprintln!("ytt transfer export: {msg}");
+                    eprintln!("better-ytt transfer export: {msg}");
                     EXIT_USAGE
                 }
             }
@@ -150,7 +150,7 @@ pub fn run(args: &[String]) -> i32 {
             match parse_backup(&rest) {
                 Ok((dir, csv)) => runtime().map_or(EXIT_FAILED, |rt| rt.block_on(backup(dir, csv))),
                 Err(msg) => {
-                    eprintln!("ytt transfer backup: {msg}");
+                    eprintln!("better-ytt transfer backup: {msg}");
                     EXIT_USAGE
                 }
             }
@@ -163,7 +163,7 @@ pub fn run(args: &[String]) -> i32 {
                     runtime().map_or(EXIT_FAILED, |rt| rt.block_on(resume(job_id, yes)))
                 }
                 None => {
-                    eprintln!("ytt transfer resume: missing <JOB-ID> (see `ytt transfer jobs`)");
+                    eprintln!("better-ytt transfer resume: missing <JOB-ID> (see `ytt transfer jobs`)");
                     EXIT_USAGE
                 }
             }
@@ -173,7 +173,7 @@ pub fn run(args: &[String]) -> i32 {
             if args.is_empty() { EXIT_USAGE } else { EXIT_OK }
         }
         Some(other) => {
-            eprintln!("ytt transfer: unknown command `{other}`");
+            eprintln!("better-ytt transfer: unknown command `{other}`");
             eprintln!("{USAGE}");
             EXIT_USAGE
         }
@@ -258,7 +258,7 @@ async fn execute_new(spec: JobSpec, yes: bool, kind: &str) -> i32 {
     let mut ctx = match build_ctx(&first_spec, &cfg).await {
         Ok(ctx) => ctx,
         Err(msg) => {
-            eprintln!("ytt transfer: {msg}");
+            eprintln!("better-ytt transfer: {msg}");
             return EXIT_FAILED;
         }
     };
@@ -302,7 +302,7 @@ async fn execute_new(spec: JobSpec, yes: bool, kind: &str) -> i32 {
         let cp = match Checkpoint::load(&job_id) {
             Ok(cp) => cp,
             Err(e) => {
-                eprintln!("ytt transfer: {e:#}");
+                eprintln!("better-ytt transfer: {e:#}");
                 return EXIT_FAILED;
             }
         };
@@ -316,7 +316,7 @@ async fn resume(job_id: String, yes: bool) -> i32 {
     let mut cp = match Checkpoint::load(&job_id) {
         Ok(cp) => cp,
         Err(e) => {
-            eprintln!("ytt transfer: {e:#}");
+            eprintln!("better-ytt transfer: {e:#}");
             return EXIT_FAILED;
         }
     };
@@ -333,7 +333,7 @@ async fn resume(job_id: String, yes: bool) -> i32 {
         let mut ctx = match build_ctx(&preview_spec, &cfg).await {
             Ok(ctx) => ctx,
             Err(msg) => {
-                eprintln!("ytt transfer: {msg}");
+                eprintln!("better-ytt transfer: {msg}");
                 return EXIT_FAILED;
             }
         };
@@ -367,7 +367,7 @@ async fn resume(job_id: String, yes: bool) -> i32 {
         cp = match Checkpoint::load(&job_id) {
             Ok(cp) => cp,
             Err(error) => {
-                eprintln!("ytt transfer: {error:#}");
+                eprintln!("better-ytt transfer: {error:#}");
                 return EXIT_FAILED;
             }
         };
@@ -401,7 +401,7 @@ async fn finish_resumed(job_id: String, cp: Checkpoint, cfg: &Config) -> i32 {
     let mut ctx = match build_ctx(&spec, cfg).await {
         Ok(ctx) => ctx,
         Err(msg) => {
-            eprintln!("ytt transfer: {msg}");
+            eprintln!("better-ytt transfer: {msg}");
             return EXIT_FAILED;
         }
     };
@@ -468,7 +468,7 @@ fn next_step_lines(report: &TransferReport, session: Option<&ImportSession>) -> 
 
 fn print_job_error(job_id: &str, e: JobError) -> i32 {
     finish_progress_line();
-    eprintln!("ytt transfer: {:#}", e.error);
+    eprintln!("better-ytt transfer: {:#}", e.error);
     if e.resumable {
         eprintln!("The job is checkpointed — continue with: ytt transfer resume {job_id}");
         EXIT_RESUMABLE
@@ -569,7 +569,7 @@ fn show_session(job_id: &str) -> i32 {
     let session = match ImportSession::load(job_id) {
         Ok(session) => session,
         Err(e) => {
-            eprintln!("ytt transfer session: {e:#}");
+            eprintln!("better-ytt transfer session: {e:#}");
             return EXIT_FAILED;
         }
     };
@@ -669,7 +669,7 @@ async fn backup(dir: PathBuf, also_csv: bool) -> i32 {
     let cfg = Config::load();
     let Some(cookie) = cfg.effective_cookie() else {
         eprintln!(
-            "ytt transfer backup: this needs a YouTube Music cookie — add cookies.txt in Settings."
+            "better-ytt transfer backup: this needs a YouTube Music cookie — add cookies.txt in Settings."
         );
         return EXIT_FAILED;
     };
@@ -677,7 +677,7 @@ async fn backup(dir: PathBuf, also_csv: bool) -> i32 {
         Ok(api) => api,
         Err(e) => {
             eprintln!(
-                "ytt transfer backup: {}",
+                "better-ytt transfer backup: {}",
                 crate::util::sanitize::sanitize_error_text(format!("{e:#}"))
             );
             return EXIT_FAILED;
@@ -685,7 +685,7 @@ async fn backup(dir: PathBuf, also_csv: bool) -> i32 {
     };
     if let Err(e) = std::fs::create_dir_all(&dir) {
         eprintln!(
-            "ytt transfer backup: could not create {}: {e}",
+            "better-ytt transfer backup: could not create {}: {e}",
             dir.display()
         );
         return EXIT_FAILED;
@@ -694,7 +694,7 @@ async fn backup(dir: PathBuf, also_csv: bool) -> i32 {
         Ok(p) => p,
         Err(e) => {
             eprintln!(
-                "ytt transfer backup: {}",
+                "better-ytt transfer backup: {}",
                 crate::util::sanitize::sanitize_error_text(format!("{e:#}"))
             );
             return EXIT_FAILED;
@@ -784,7 +784,7 @@ pub fn run_auth(args: &[String]) -> i32 {
             "--client-id" => match it.next() {
                 Some(v) => client_id_flag = Some(v.to_owned()),
                 None => {
-                    eprintln!("ytt auth spotify: --client-id needs a value");
+                    eprintln!("better-ytt auth spotify: --client-id needs a value");
                     return EXIT_USAGE;
                 }
             },
@@ -795,7 +795,7 @@ pub fn run_auth(args: &[String]) -> i32 {
                 return EXIT_OK;
             }
             other => {
-                eprintln!("ytt auth spotify: unknown flag `{other}`");
+                eprintln!("better-ytt auth spotify: unknown flag `{other}`");
                 return EXIT_USAGE;
             }
         }
@@ -807,7 +807,7 @@ pub fn run_auth(args: &[String]) -> i32 {
                 EXIT_OK
             }
             Err(e) => {
-                eprintln!("ytt auth spotify: could not remove token: {e}");
+                eprintln!("better-ytt auth spotify: could not remove token: {e}");
                 EXIT_FAILED
             }
         };
@@ -821,7 +821,7 @@ pub fn run_auth(args: &[String]) -> i32 {
             let mut client = match SpotifyClient::from_saved(cfg.spotify.client_id.as_deref()) {
                 Ok(c) => c,
                 Err(e) => {
-                    eprintln!("ytt auth spotify: {e}");
+                    eprintln!("better-ytt auth spotify: {e}");
                     return EXIT_FAILED;
                 }
             };
@@ -831,7 +831,7 @@ pub fn run_auth(args: &[String]) -> i32 {
                     EXIT_OK
                 }
                 Err(e) => {
-                    eprintln!("ytt auth spotify: {e}");
+                    eprintln!("better-ytt auth spotify: {e}");
                     EXIT_FAILED
                 }
             }
@@ -850,7 +850,7 @@ async fn connect(client_id_flag: Option<String>) -> i32 {
     {
         cfg.spotify.client_id = Some(id.to_owned());
         if let Err(e) = cfg.save() {
-            eprintln!("ytt auth spotify: could not save config: {e}");
+            eprintln!("better-ytt auth spotify: could not save config: {e}");
             return EXIT_FAILED;
         }
     }
@@ -861,7 +861,7 @@ async fn connect(client_id_flag: Option<String>) -> i32 {
         .map(|s| s.trim().to_owned())
         .filter(|s| !s.is_empty())
     else {
-        eprintln!("ytt auth spotify: no Client ID configured.");
+        eprintln!("better-ytt auth spotify: no Client ID configured.");
         eprintln!("Create an app at https://developer.spotify.com/dashboard with redirect URI");
         eprintln!(
             "  http://127.0.0.1:{}/callback",
@@ -884,10 +884,10 @@ async fn connect(client_id_flag: Option<String>) -> i32 {
         let opened = crate::util::browser::open_in_browser_checked(&url);
         if !opened.launched() {
             eprintln!(
-                "ytt auth spotify: could not open a browser automatically: {}",
+                "better-ytt auth spotify: could not open a browser automatically: {}",
                 opened.failure_summary()
             );
-            eprintln!("ytt auth spotify: paste the URL above into your browser to continue.");
+            eprintln!("better-ytt auth spotify: paste the URL above into your browser to continue.");
         }
         println!("Waiting for approval (up to 5 minutes; Ctrl-C to abort)…");
     })
@@ -895,7 +895,7 @@ async fn connect(client_id_flag: Option<String>) -> i32 {
     let token = match flow {
         Ok(token) => token,
         Err(e) => {
-            eprintln!("ytt auth spotify: {e:#}");
+            eprintln!("better-ytt auth spotify: {e:#}");
             return EXIT_FAILED;
         }
     };
@@ -906,11 +906,11 @@ async fn connect(client_id_flag: Option<String>) -> i32 {
             EXIT_OK
         }
         Err(SpotifyError::NotAllowlisted) => {
-            eprintln!("ytt auth spotify: {}", SpotifyError::NotAllowlisted);
+            eprintln!("better-ytt auth spotify: {}", SpotifyError::NotAllowlisted);
             EXIT_FAILED
         }
         Err(e) => {
-            eprintln!("ytt auth spotify: connected, but /me failed: {e}");
+            eprintln!("better-ytt auth spotify: connected, but /me failed: {e}");
             EXIT_FAILED
         }
     }
@@ -921,7 +921,7 @@ async fn list_spotify() -> i32 {
     let mut client = match SpotifyClient::from_saved(cfg.spotify.client_id.as_deref()) {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("ytt transfer: {e}");
+            eprintln!("better-ytt transfer: {e}");
             return EXIT_FAILED;
         }
     };
@@ -944,7 +944,7 @@ async fn list_spotify() -> i32 {
             EXIT_OK
         }
         Err(e) => {
-            eprintln!("ytt transfer: {e}");
+            eprintln!("better-ytt transfer: {e}");
             EXIT_FAILED
         }
     }
@@ -954,7 +954,7 @@ async fn list_ytm() -> i32 {
     let cfg = Config::load();
     let Some(cookie) = cfg.effective_cookie() else {
         eprintln!(
-            "ytt transfer: this needs a YouTube Music cookie — add cookies.txt (or `cookie`) in Settings › General."
+            "better-ytt transfer: this needs a YouTube Music cookie — add cookies.txt (or `cookie`) in Settings › General."
         );
         return EXIT_FAILED;
     };
@@ -962,7 +962,7 @@ async fn list_ytm() -> i32 {
         Ok(api) => api,
         Err(e) => {
             eprintln!(
-                "ytt transfer: YouTube Music auth failed: {}",
+                "better-ytt transfer: YouTube Music auth failed: {}",
                 crate::util::sanitize::sanitize_error_text(format!("{e:#}"))
             );
             return EXIT_FAILED;
@@ -982,7 +982,7 @@ async fn list_ytm() -> i32 {
         }
         Err(e) => {
             eprintln!(
-                "ytt transfer: {}",
+                "better-ytt transfer: {}",
                 crate::util::sanitize::sanitize_error_text(format!("{e:#}"))
             );
             EXIT_FAILED

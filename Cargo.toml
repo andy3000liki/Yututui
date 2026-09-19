@@ -26,15 +26,15 @@ unsafe_op_in_unsafe_fn = "deny"
 [lints.clippy]
 undocumented_unsafe_blocks = "deny"
 
-# The shipped command is `ytt` — short to type and what the README/installers expose.
+# The shipped command is `better-ytt` (Zegon fork rename of upstream `ytt`).
 # The crate keeps the longer `yututui` name (and the config/data dir string stays
 # "yututui"), so this only renames the produced binary, nothing user-facing.
 [[bin]]
-name = "ytt"
+name = "better-ytt"
 path = "src/main.rs"
 
 [[bin]]
-name = "ytt-dev"
+name = "better-ytt-dev"
 path = "src/bin/ytt-dev.rs"
 
 [[bin]]

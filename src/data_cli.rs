@@ -95,7 +95,7 @@ fn run_import(args: &[String]) -> i32 {
     let path = match resolve_import_source(&request.file) {
         Ok(path) => path,
         Err(message) => {
-            eprintln!("ytt data import: {message}");
+            eprintln!("better-ytt data import: {message}");
             return EXIT_RUNTIME;
         }
     };
@@ -113,7 +113,7 @@ fn run_import(args: &[String]) -> i32 {
                 yututui::util::sanitize::sanitize_error_text(error.to_string())
             )
         };
-        eprintln!("ytt data import: {message}");
+        eprintln!("better-ytt data import: {message}");
         return EXIT_RUNTIME;
     }
 
@@ -126,7 +126,7 @@ fn run_import(args: &[String]) -> i32 {
         Ok(plan) => plan,
         Err(error) => {
             eprintln!(
-                "ytt data import: {}",
+                "better-ytt data import: {}",
                 yututui::util::sanitize::sanitize_error_text(error.to_string())
             );
             return EXIT_RUNTIME;
@@ -148,7 +148,7 @@ fn run_import(args: &[String]) -> i32 {
         }
         Err(error) => {
             eprintln!(
-                "ytt data import: {}",
+                "better-ytt data import: {}",
                 yututui::util::sanitize::sanitize_error_text(error.to_string())
             );
             EXIT_RUNTIME
@@ -189,7 +189,7 @@ fn run_export(args: &[String]) -> i32 {
     let directory = match resolve_destination(requested.destination.as_deref()) {
         Ok(path) => path,
         Err(message) => {
-            eprintln!("ytt data export: {message}");
+            eprintln!("better-ytt data export: {message}");
             return EXIT_RUNTIME;
         }
     };
@@ -200,7 +200,7 @@ fn run_export(args: &[String]) -> i32 {
     {
         Ok(runtime) => runtime,
         Err(error) => {
-            eprintln!("ytt data export: could not start runtime: {error}");
+            eprintln!("better-ytt data export: could not start runtime: {error}");
             return EXIT_RUNTIME;
         }
     };
@@ -209,7 +209,7 @@ fn run_export(args: &[String]) -> i32 {
     )) {
         Ok(instance) => instance,
         Err(error) => {
-            eprintln!("ytt data export: {}", error.human_message());
+            eprintln!("better-ytt data export: {}", error.human_message());
             return EXIT_RUNTIME;
         }
     };
@@ -228,7 +228,7 @@ fn run_export(args: &[String]) -> i32 {
             EXIT_OK
         }
         Err(message) => {
-            eprintln!("ytt data export: {message}");
+            eprintln!("better-ytt data export: {message}");
             EXIT_RUNTIME
         }
     }
@@ -696,17 +696,17 @@ fn home_dir() -> Result<PathBuf, String> {
 }
 
 fn data_usage_error(message: &str) -> i32 {
-    eprintln!("ytt data: {message}\n\n{DATA_USAGE}");
+    eprintln!("better-ytt data: {message}\n\n{DATA_USAGE}");
     EXIT_USAGE
 }
 
 fn export_usage_error(message: &str) -> i32 {
-    eprintln!("ytt data export: {message}\n\n{EXPORT_USAGE}");
+    eprintln!("better-ytt data export: {message}\n\n{EXPORT_USAGE}");
     EXIT_USAGE
 }
 
 fn import_usage_error(message: &str) -> i32 {
-    eprintln!("ytt data import: {message}\n\n{IMPORT_USAGE}");
+    eprintln!("better-ytt data import: {message}\n\n{IMPORT_USAGE}");
     EXIT_USAGE
 }
 

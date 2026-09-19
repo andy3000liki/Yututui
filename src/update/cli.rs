@@ -43,7 +43,7 @@ pub fn run(args: &[String]) -> i32 {
             return 1;
         }
         None => {
-            eprintln!("ytt update: failed to build async runtime");
+            eprintln!("better-ytt update: failed to build async runtime");
             return 1;
         }
     };

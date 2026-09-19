@@ -575,7 +575,7 @@ fn start_guardian(mut request: GuardianRequest, long_lived: bool) -> Result<Pend
     let exe = std::env::current_exe().context("locate ytt executable for mpv guardian")?;
     let exe = exe
         .to_str()
-        .context("ytt executable path is not valid UTF-8")?;
+        .context("better-ytt executable path is not valid UTF-8")?;
     let mut command = process::std_command(exe, ProcessProfile::Media);
     command
         .arg("__mpv-guardian")

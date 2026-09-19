@@ -139,7 +139,7 @@ pub fn run(args_in: &[String]) -> i32 {
             return EXIT_OK;
         }
         Err(ParseError::Invalid(msg)) => {
-            eprintln!("ytt -r: {msg}");
+            eprintln!("better-ytt -r: {msg}");
             return EXIT_USAGE;
         }
     };
@@ -150,7 +150,7 @@ pub fn run(args_in: &[String]) -> i32 {
     {
         Ok(rt) => rt,
         Err(e) => {
-            eprintln!("ytt -r: could not start runtime: {e}");
+            eprintln!("better-ytt -r: could not start runtime: {e}");
             return EXIT_TRANSPORT;
         }
     };
@@ -467,7 +467,7 @@ fn exchange_default_response(
     let resp = match response {
         Ok(r) => r,
         Err(e) => {
-            eprintln!("ytt -r: {}", e.human_message());
+            eprintln!("better-ytt -r: {}", e.human_message());
             return EXIT_TRANSPORT;
         }
     };
@@ -483,7 +483,7 @@ fn exchange_default_response(
     } else {
         // Errors always print, even under `-q`. The machine reason is the actionable bit.
         let reason = resp.reason.as_deref().unwrap_or("rejected");
-        eprintln!("ytt -r: {reason}");
+        eprintln!("better-ytt -r: {reason}");
         EXIT_USAGE
     }
 }
@@ -492,7 +492,7 @@ async fn exchange_info(json: bool, quiet: bool) -> i32 {
     let instance = match endpoint::read_current_instance() {
         Ok(instance) => instance,
         Err(error) => {
-            eprintln!("ytt -r: {error}");
+            eprintln!("better-ytt -r: {error}");
             return EXIT_TRANSPORT;
         }
     };
@@ -501,16 +501,16 @@ async fn exchange_info(json: bool, quiet: bool) -> i32 {
     let response = match send_to(instance.clone(), RemoteCommand::Status).await {
         Ok(response) => response,
         Err(error) => {
-            eprintln!("ytt -r: {}", error.human_message());
+            eprintln!("better-ytt -r: {}", error.human_message());
             return EXIT_TRANSPORT;
         }
     };
     if !response.ok {
-        eprintln!("ytt -r: {}", info_rejection_message(&response));
+        eprintln!("better-ytt -r: {}", info_rejection_message(&response));
         return EXIT_USAGE;
     }
     if response.status.is_none() {
-        eprintln!("ytt -r: {}", ClientError::MalformedResponse.human_message());
+        eprintln!("better-ytt -r: {}", ClientError::MalformedResponse.human_message());
         return EXIT_TRANSPORT;
     }
 
@@ -533,7 +533,7 @@ async fn exchange_status_projection(
     let response = match send_current(RemoteCommand::Status).await {
         Ok(response) => response,
         Err(error) => {
-            eprintln!("ytt -r: {}", error.human_message());
+            eprintln!("better-ytt -r: {}", error.human_message());
             return EXIT_TRANSPORT;
         }
     };
@@ -541,7 +541,7 @@ async fn exchange_status_projection(
         return print_rejection(&response);
     }
     let Some(status) = response.status.as_ref() else {
-        eprintln!("ytt -r: {}", ClientError::MalformedResponse.human_message());
+        eprintln!("better-ytt -r: {}", ClientError::MalformedResponse.human_message());
         return EXIT_TRANSPORT;
     };
     if json {
@@ -560,7 +560,7 @@ fn print_json<T: Serialize>(value: &T) -> i32 {
             EXIT_OK
         }
         Err(error) => {
-            eprintln!("ytt -r: could not encode response: {error}");
+            eprintln!("better-ytt -r: could not encode response: {error}");
             EXIT_TRANSPORT
         }
     }
@@ -568,7 +568,7 @@ fn print_json<T: Serialize>(value: &T) -> i32 {
 
 fn print_rejection(response: &RemoteResponse) -> i32 {
     let reason = response.reason.as_deref().unwrap_or("rejected");
-    eprintln!("ytt -r: {reason}");
+    eprintln!("better-ytt -r: {reason}");
     EXIT_USAGE
 }
 

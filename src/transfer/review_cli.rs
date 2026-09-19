@@ -29,12 +29,12 @@ pub fn run(args: &[&str]) -> i32 {
             EXIT_OK
         }
         Err(ReviewError::Usage(message)) => {
-            eprintln!("ytt transfer review: {message}");
+            eprintln!("better-ytt transfer review: {message}");
             eprintln!("{USAGE}");
             EXIT_USAGE
         }
         Err(ReviewError::Failed(error)) => {
-            eprintln!("ytt transfer review: {error:#}");
+            eprintln!("better-ytt transfer review: {error:#}");
             EXIT_FAILED
         }
     }

@@ -43,13 +43,13 @@ fn initialize_cli_persistence(command: OneShotCommand, args: &[String]) -> bool 
             if capability.allows_writes()
                 && let Err(error) = persist::preflight_all_startup_stores()
             {
-                eprintln!("ytt {}: {error}", command.label());
+                eprintln!("better-ytt {}: {error}", command.label());
                 return false;
             }
             true
         }
         Err(error) => {
-            eprintln!("ytt {}: {error}", command.label());
+            eprintln!("better-ytt {}: {error}", command.label());
             false
         }
     }
@@ -99,8 +99,8 @@ mod sync_cli;
 
 fn cli_identity() -> (&'static str, &'static str) {
     match option_env!("CARGO_BIN_NAME") {
-        Some("ytt-dev") => ("ytt-dev", concat!(env!("CARGO_PKG_VERSION"), "-dev")),
-        _ => ("ytt", env!("CARGO_PKG_VERSION")),
+        Some("better-ytt-dev") => ("better-ytt-dev", concat!(env!("CARGO_PKG_VERSION"), "-dev")),
+        _ => ("better-ytt", env!("CARGO_PKG_VERSION")),
     }
 }
 

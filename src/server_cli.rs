@@ -167,7 +167,7 @@ pub fn run(args: &[String]) -> i32 {
     match result {
         Ok(()) => EXIT_OK,
         Err(error) => {
-            eprintln!("ytt server: {error}");
+            eprintln!("better-ytt server: {error}");
             EXIT_RUNTIME
         }
     }
@@ -938,7 +938,7 @@ fn is_affirmative_confirmation(value: &str) -> bool {
 }
 
 fn usage_error(message: &str) -> i32 {
-    eprintln!("ytt server: {message}");
+    eprintln!("better-ytt server: {message}");
     eprintln!("Try `ytt server --help`.");
     EXIT_USAGE
 }

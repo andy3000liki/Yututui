@@ -938,14 +938,14 @@ mod tests {
                     MusicServerHistoryHealth::UpdatePassword,
                     Some(MusicServerCredentialMode::ApiKey),
                 )
-                .contains("ytt server history enable --experimental")
+                .contains("better-ytt server history enable --experimental")
             );
             assert!(
                 history_health_label(
                     MusicServerHistoryHealth::UpdatePassword,
                     Some(MusicServerCredentialMode::Password),
                 )
-                .contains("ytt server setup")
+                .contains("better-ytt server setup")
             );
             let expected = match language {
                 crate::i18n::Language::English => ("Password", "API key"),

@@ -207,7 +207,7 @@ pub(super) fn run_json() -> i32 {
             0
         }
         Err(error) => {
-            eprintln!("ytt doctor: could not encode terminal report: {error}");
+            eprintln!("better-ytt doctor: could not encode terminal report: {error}");
             1
         }
     }

@@ -9,7 +9,7 @@ macro_rules! transport_or_return {
         match $result {
             Ok(value) => value,
             Err(error) => {
-                eprintln!("ytt daemon: {error}");
+                eprintln!("better-ytt daemon: {error}");
                 return EXIT_TRANSPORT;
             }
         }
@@ -18,7 +18,7 @@ macro_rules! transport_or_return {
         match $result {
             Ok(value) => value,
             Err(error) => {
-                eprintln!(concat!("ytt daemon: ", $context, "{}"), error);
+                eprintln!(concat!("better-ytt daemon: ", $context, "{}"), error);
                 return EXIT_TRANSPORT;
             }
         }
@@ -30,11 +30,11 @@ pub(super) use transport_or_return;
 pub(super) async fn bind_endpoint() -> Result<server::RemoteServer, i32> {
     let server = match server::bind_or_detect(false).await {
         server::BindOutcome::AlreadyRunning => {
-            eprintln!("ytt daemon: YuTuTui! is already running.");
+            eprintln!("better-ytt daemon: YuTuTui! is already running.");
             return Err(EXIT_USAGE);
         }
         server::BindOutcome::Unavailable => {
-            eprintln!("ytt daemon: could not bind remote control socket.");
+            eprintln!("better-ytt daemon: could not bind remote control socket.");
             return Err(EXIT_TRANSPORT);
         }
         server::BindOutcome::Bound(server) => *server,

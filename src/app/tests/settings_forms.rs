@@ -1173,7 +1173,7 @@ fn transfer_events_surface_playlist_progress_and_failures() {
     assert!(!app.transfer_running);
     assert_eq!(app.status.kind, StatusKind::Info);
     assert!(app.status.text.contains("Import finished"));
-    assert!(app.status.text.contains("ytt transfer session sp2yt-1"));
+    assert!(app.status.text.contains("better-ytt transfer session sp2yt-1"));
     assert!(app.status.text.contains("Library > Playlists"));
     assert!(!app.status.text.contains("Shift+D"));
     assert!(app.status.text.contains("Import Sessions"));
@@ -1198,7 +1198,7 @@ fn transfer_events_surface_playlist_progress_and_failures() {
     assert!(!app.transfer_running);
     assert_eq!(app.status.kind, StatusKind::Error);
     assert!(app.status.text.contains("Import interrupted"));
-    assert!(app.status.text.contains("ytt transfer resume sp2yt-1"));
+    assert!(app.status.text.contains("better-ytt transfer resume sp2yt-1"));
 
     app.transfer_running = true;
     app.update(Msg::Transfer(TransferEvent::JobFailed {

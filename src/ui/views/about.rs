@@ -255,7 +255,7 @@ fn push_row(constraints: &mut Vec<Constraint>, c: Constraint) -> usize {
 /// measured over the actual values so Korean keys and future edits stay centered.
 fn kv_left_pad(inner_w: u16) -> usize {
     let widest = [
-        "ytt",
+        "better-ytt",
         "MIT · © 2026 Ochichan",
         "Ochichan",
         "Rust · ratatui",
@@ -337,7 +337,7 @@ fn draw_text(frame: &mut Frame, app: &App, area: Rect) {
     // The whole block is centered as a unit via the shared pad so it no longer hugs the left edge.
     let block_pad = " ".repeat(kv_left_pad(area.width));
     let info = [
-        (t!("Command", "명령어", "コマンド"), "ytt"),
+        (t!("Command", "명령어", "コマンド"), "better-ytt"),
         (
             t!("License", "라이선스", "使用許諾"),
             "MIT · © 2026 Ochichan",

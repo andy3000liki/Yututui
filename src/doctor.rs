@@ -353,7 +353,7 @@ fn run_inner(verbose: bool) -> i32 {
     // (a Core tool missing, or a required directory not writable).
     let mut ok = true;
 
-    println!("ytt doctor — YuTuTui! {}", env!("CARGO_PKG_VERSION"));
+    println!("better-ytt doctor — YuTuTui! {}", env!("CARGO_PKG_VERSION"));
     // Install method (from the running binary's path) + any cached "newer release" notice.
     // Offline: reads only persisted state, never the network — run `ytt update` to re-check.
     let method = crate::update::detect_install_method();

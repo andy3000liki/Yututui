@@ -20,7 +20,7 @@ pub fn run_lastfm() -> i32 {
     {
         Ok(rt) => rt,
         Err(e) => {
-            eprintln!("ytt auth lastfm: could not start runtime: {e}");
+            eprintln!("better-ytt auth lastfm: could not start runtime: {e}");
             return EXIT_FAILED;
         }
     };
@@ -31,7 +31,7 @@ pub fn run_lastfm() -> i32 {
 /// default) instance, then persist it.
 pub fn run_listenbrainz(token: Option<&str>) -> i32 {
     let Some(token) = token.map(str::trim).filter(|t| !t.is_empty()) else {
-        eprintln!("ytt auth listenbrainz: missing token.");
+        eprintln!("better-ytt auth listenbrainz: missing token.");
         eprintln!("Copy it from https://listenbrainz.org/settings/ and run:");
         eprintln!("  ytt auth listenbrainz <token>");
         return EXIT_FAILED;
@@ -42,7 +42,7 @@ pub fn run_listenbrainz(token: Option<&str>) -> i32 {
     {
         Ok(rt) => rt,
         Err(e) => {
-            eprintln!("ytt auth listenbrainz: could not start runtime: {e}");
+            eprintln!("better-ytt auth listenbrainz: could not start runtime: {e}");
             return EXIT_FAILED;
         }
     };
@@ -59,7 +59,7 @@ pub fn run_listenbrainz(token: Option<&str>) -> i32 {
             Ok(username) => {
                 cfg.scrobble.listenbrainz.token = Some(token.to_owned());
                 if let Err(e) = cfg.save() {
-                    eprintln!("ytt auth listenbrainz: token valid, but saving config failed: {e}");
+                    eprintln!("better-ytt auth listenbrainz: token valid, but saving config failed: {e}");
                     return EXIT_FAILED;
                 }
                 match username {
@@ -72,7 +72,7 @@ pub fn run_listenbrainz(token: Option<&str>) -> i32 {
                 EXIT_OK
             }
             Err(e) => {
-                eprintln!("ytt auth listenbrainz: {e}");
+                eprintln!("better-ytt auth listenbrainz: {e}");
                 EXIT_FAILED
             }
         }
@@ -82,7 +82,7 @@ pub fn run_listenbrainz(token: Option<&str>) -> i32 {
 async fn connect_lastfm() -> i32 {
     let mut cfg = Config::load();
     let Some(app) = cfg.scrobble_settings().lastfm_app else {
-        eprintln!("ytt auth lastfm: no Last.fm application credentials available.");
+        eprintln!("better-ytt auth lastfm: no Last.fm application credentials available.");
         eprintln!("This build ships none embedded — create an API account at");
         eprintln!("https://www.last.fm/api/account/create and put the key + shared secret");
         eprintln!("into config.json under scrobble.lastfm.api_key / api_secret.");
@@ -98,7 +98,7 @@ async fn connect_lastfm() -> i32 {
     let token = match client.get_token().await {
         Ok(token) => token,
         Err(e) => {
-            eprintln!("ytt auth lastfm: {e}");
+            eprintln!("better-ytt auth lastfm: {e}");
             return EXIT_FAILED;
         }
     };
@@ -110,10 +110,10 @@ async fn connect_lastfm() -> i32 {
     let opened = crate::util::browser::open_in_browser_checked(&url);
     if !opened.launched() {
         eprintln!(
-            "ytt auth lastfm: could not open a browser automatically: {}",
+            "better-ytt auth lastfm: could not open a browser automatically: {}",
             opened.failure_summary()
         );
-        eprintln!("ytt auth lastfm: paste the URL above into your browser to continue.");
+        eprintln!("better-ytt auth lastfm: paste the URL above into your browser to continue.");
     }
     println!("Waiting for approval (up to 5 minutes; Ctrl-C to abort)…");
 
@@ -121,7 +121,7 @@ async fn connect_lastfm() -> i32 {
     loop {
         tokio::time::sleep(AUTH_POLL).await;
         if Instant::now() >= deadline {
-            eprintln!("ytt auth lastfm: authorization timed out — run it again.");
+            eprintln!("better-ytt auth lastfm: authorization timed out — run it again.");
             return EXIT_FAILED;
         }
         match client.get_session(&token).await {
@@ -130,7 +130,7 @@ async fn connect_lastfm() -> i32 {
                 cfg.scrobble.lastfm.session_key = Some(key);
                 cfg.scrobble.lastfm.username = Some(username.clone());
                 if let Err(e) = cfg.save() {
-                    eprintln!("ytt auth lastfm: connected, but saving config failed: {e}");
+                    eprintln!("better-ytt auth lastfm: connected, but saving config failed: {e}");
                     return EXIT_FAILED;
                 }
                 println!("Connected as {username}. Scrobbling is on.");
@@ -142,7 +142,7 @@ async fn connect_lastfm() -> i32 {
             // Transient trouble mid-poll: keep waiting out the budget.
             Err(ScrobbleError::Network(_) | ScrobbleError::RateLimited(_)) => {}
             Err(e) => {
-                eprintln!("ytt auth lastfm: {e}");
+                eprintln!("better-ytt auth lastfm: {e}");
                 return EXIT_FAILED;
             }
         }

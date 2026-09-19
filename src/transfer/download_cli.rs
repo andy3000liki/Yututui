@@ -20,12 +20,12 @@ pub fn run(args: &[&str]) -> i32 {
             EXIT_OK
         }
         Err(DownloadCliError::Usage(message)) => {
-            eprintln!("ytt transfer download: {message}");
+            eprintln!("better-ytt transfer download: {message}");
             eprintln!("{USAGE}");
             EXIT_USAGE
         }
         Err(DownloadCliError::Failed(error)) => {
-            eprintln!("ytt transfer download: {error:#}");
+            eprintln!("better-ytt transfer download: {error:#}");
             EXIT_FAILED
         }
     }

@@ -52,7 +52,7 @@ where
         cancel_result = &mut cancel => match cancel_result {
             Ok(()) => EXIT_OK,
             Err(error) => {
-                eprintln!("ytt -r: could not listen for Ctrl-C: {error}");
+                eprintln!("better-ytt -r: could not listen for Ctrl-C: {error}");
                 EXIT_TRANSPORT
             }
         },
@@ -64,7 +64,7 @@ async fn run_operation(topics: Vec<Topic>, json: bool, quiet: bool) -> i32 {
     let topics = match normalize_topics(topics) {
         Ok(topics) => topics,
         Err(error) => {
-            eprintln!("ytt -r: {}", error.message);
+            eprintln!("better-ytt -r: {}", error.message);
             return error.exit_code();
         }
     };
@@ -72,30 +72,30 @@ async fn run_operation(topics: Vec<Topic>, json: bool, quiet: bool) -> i32 {
     let instance = match endpoint::read_current_instance() {
         Ok(instance) => instance,
         Err(error) => {
-            eprintln!("ytt -r: {error}");
+            eprintln!("better-ytt -r: {error}");
             return EXIT_TRANSPORT;
         }
     };
     if instance.protocol_version < PROTOCOL_VERSION {
         eprintln!(
-            "ytt -r: watch requires protocol {PROTOCOL_VERSION} or newer (owner advertises {}).",
+            "better-ytt -r: watch requires protocol {PROTOCOL_VERSION} or newer (owner advertises {}).",
             instance.protocol_version
         );
         return EXIT_USAGE;
     }
     if !has_events_capability(&instance.capabilities) {
-        eprintln!("ytt -r: the running ytt instance does not support watch events.");
+        eprintln!("better-ytt -r: the running ytt instance does not support watch events.");
         return EXIT_USAGE;
     }
 
     let Ok(name) = instance.endpoint.as_str().to_fs_name::<GenericFilePath>() else {
-        eprintln!("ytt -r: malformed endpoint in the instance descriptor.");
+        eprintln!("better-ytt -r: malformed endpoint in the instance descriptor.");
         return EXIT_TRANSPORT;
     };
     let stream = match timeout(CONNECT_TIMEOUT, Stream::connect(name)).await {
         Ok(Ok(stream)) => stream,
         _ => {
-            eprintln!("ytt -r: could not reach ytt (it may have exited).");
+            eprintln!("better-ytt -r: could not reach ytt (it may have exited).");
             return EXIT_TRANSPORT;
         }
     };
@@ -120,7 +120,7 @@ async fn run_operation(topics: Vec<Topic>, json: bool, quiet: bool) -> i32 {
     {
         Ok(()) => EXIT_OK,
         Err(error) => {
-            eprintln!("ytt -r: {}", error.message);
+            eprintln!("better-ytt -r: {}", error.message);
             error.exit_code()
         }
     }

@@ -21,7 +21,7 @@ pub fn run(args: &[String]) -> i32 {
                 0
             }
             Some(other) => {
-                eprintln!("ytt tools status: unknown option `{other}`");
+                eprintln!("better-ytt tools status: unknown option `{other}`");
                 help();
                 2
             }
@@ -36,7 +36,7 @@ pub fn run(args: &[String]) -> i32 {
             0
         }
         Some(other) => {
-            eprintln!("ytt tools: unknown command `{other}`");
+            eprintln!("better-ytt tools: unknown command `{other}`");
             help();
             2
         }
@@ -72,7 +72,7 @@ fn status(why: bool) -> i32 {
     let lang = i18n::current();
 
     let Some(()) = block_on(tools::init(&cfg.tools)) else {
-        eprintln!("ytt tools: failed to build async runtime");
+        eprintln!("better-ytt tools: failed to build async runtime");
         return 1;
     };
 
@@ -342,7 +342,7 @@ struct ResolvedPin {
 
 fn use_ytdlp(args: &[String]) -> i32 {
     if args.len() != 1 {
-        eprintln!("ytt tools use: expected exactly one target");
+        eprintln!("better-ytt tools use: expected exactly one target");
         eprintln!("usage: ytt tools use <system|managed|path>");
         return 2;
     }
@@ -354,7 +354,7 @@ fn use_ytdlp(args: &[String]) -> i32 {
     let target = match parse_use_target(&args[0]) {
         Ok(target) => target,
         Err(msg) => {
-            eprintln!("ytt tools use: {msg}");
+            eprintln!("better-ytt tools use: {msg}");
             eprintln!("usage: ytt tools use <system|managed|path>");
             return 2;
         }
@@ -363,14 +363,14 @@ fn use_ytdlp(args: &[String]) -> i32 {
     let pin = match resolve_pin_target(&target, lang) {
         Ok(pin) => pin,
         Err(msg) => {
-            eprintln!("ytt tools use: {msg}");
+            eprintln!("better-ytt tools use: {msg}");
             return 1;
         }
     };
 
     apply_pin(&mut cfg, &pin);
     if let Err(e) = cfg.save() {
-        eprintln!("ytt tools use: failed to save config: {e}");
+        eprintln!("better-ytt tools use: failed to save config: {e}");
         return 1;
     }
 
@@ -408,7 +408,7 @@ fn unpin_ytdlp() -> i32 {
     cfg.tools.ytdlp_path = None;
     cfg.tools.ytdlp_managed = None;
     if let Err(e) = cfg.save() {
-        eprintln!("ytt tools unpin: failed to save config: {e}");
+        eprintln!("better-ytt tools unpin: failed to save config: {e}");
         return 1;
     }
 
@@ -494,7 +494,7 @@ fn reset(args: &[String]) -> i32 {
 
     if block_on(tools::init(&cfg.tools)).is_none() {
         ok = false;
-        eprintln!("ytt tools reset: failed to refresh tool selection");
+        eprintln!("better-ytt tools reset: failed to refresh tool selection");
     }
     if let Some(err) = tools::ytdlp_selection_error() {
         ok = false;
@@ -509,7 +509,7 @@ fn diagnose() -> i32 {
     i18n::set_language(cfg.effective_language());
     let lang = i18n::current();
     if block_on(tools::init(&cfg.tools)).is_none() {
-        eprintln!("ytt tools diagnose: failed to refresh tool selection");
+        eprintln!("better-ytt tools diagnose: failed to refresh tool selection");
         return 1;
     }
 
@@ -650,21 +650,21 @@ fn diagnose() -> i32 {
     }
 
     let Some(path) = diagnostic_path() else {
-        eprintln!("ytt tools diagnose: no cache directory on this platform");
+        eprintln!("better-ytt tools diagnose: no cache directory on this platform");
         return 1;
     };
     if let Some(dir) = path.parent()
         && let Err(e) = crate::util::safe_fs::ensure_private_dir(dir)
     {
         eprintln!(
-            "ytt tools diagnose: failed to create {}: {e}",
+            "better-ytt tools diagnose: failed to create {}: {e}",
             dir.display()
         );
         return 1;
     }
     if let Err(e) = crate::util::safe_fs::write_private_atomic(&path, report.as_bytes()) {
         eprintln!(
-            "ytt tools diagnose: failed to write {}: {e}",
+            "better-ytt tools diagnose: failed to write {}: {e}",
             path.display()
         );
         return 1;
@@ -942,7 +942,7 @@ fn update() -> i32 {
         .await
     });
     let Some(outcome) = outcome else {
-        eprintln!("ytt tools: failed to build async runtime");
+        eprintln!("better-ytt tools: failed to build async runtime");
         return 1;
     };
 
@@ -980,7 +980,7 @@ fn update() -> i32 {
             0
         }
         tools::ytdlp::UpdateOutcome::Unavailable(e) => {
-            eprintln!("ytt tools update: {e}");
+            eprintln!("better-ytt tools update: {e}");
             1
         }
     }

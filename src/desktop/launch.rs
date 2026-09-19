@@ -110,7 +110,7 @@ fn resolve_ytt_path_from(
 }
 
 fn ytt_binary_name() -> &'static str {
-    if cfg!(windows) { "ytt.exe" } else { "ytt" }
+    if cfg!(windows) { "better-ytt.exe" } else { "better-ytt" }
 }
 
 fn path_ytt_candidates(path_env: Option<&OsStr>) -> impl Iterator<Item = PathBuf> + '_ {
@@ -193,9 +193,9 @@ pub fn open_tui_with_path(ytt_path: &Path) -> Result<LaunchPlan, LaunchError> {
         return Err(LaunchError {
             attempts: Vec::new(),
             message: crate::t!(
-                "The YuTuTui! player executable was not found. Reinstall YuTuTui! or run `ytt doctor`.",
-                "YuTuTui! 플레이어 실행 파일을 찾지 못했습니다. YuTuTui!를 다시 설치하거나 `ytt doctor`를 실행하세요.",
-                "YuTuTui!プレイヤーの実行ファイルが見つかりませんでした。YuTuTui!を再インストールするか、`ytt doctor`を実行してください。"
+                "The YuTuTui! player executable was not found. Reinstall YuTuTui! or run `better-ytt doctor`.",
+                "YuTuTui! 플레이어 실행 파일을 찾지 못했습니다. YuTuTui!를 다시 설치하거나 `better-ytt doctor`를 실행하세요.",
+                "YuTuTui!プレイヤーの実行ファイルが見つかりませんでした。YuTuTui!を再インストールするか、`better-ytt doctor`を実行してください。"
             )
             .to_owned(),
         });
@@ -236,19 +236,19 @@ pub fn open_tui_with_path(ytt_path: &Path) -> Result<LaunchPlan, LaunchError> {
         }
     }
     let english = if cfg!(target_os = "windows") {
-        "YuTuTui! could not open a terminal. Install Windows Terminal or open a terminal and run `ytt`."
+        "YuTuTui! could not open a terminal. Install Windows Terminal or open a terminal and run `better-ytt`."
     } else {
-        "YuTuTui! could not open a terminal. Open your terminal and run `ytt`."
+        "YuTuTui! could not open a terminal. Open your terminal and run `better-ytt`."
     };
     let korean = if cfg!(target_os = "windows") {
-        "YuTuTui!가 터미널을 열지 못했습니다. Windows Terminal을 설치하거나 터미널에서 `ytt`를 실행하세요."
+        "YuTuTui!가 터미널을 열지 못했습니다. Windows Terminal을 설치하거나 터미널에서 `better-ytt`를 실행하세요."
     } else {
-        "YuTuTui!가 터미널을 열지 못했습니다. 터미널을 열고 `ytt`를 실행하세요."
+        "YuTuTui!가 터미널을 열지 못했습니다. 터미널을 열고 `better-ytt`를 실행하세요."
     };
     let japanese = if cfg!(target_os = "windows") {
-        "YuTuTui!はターミナルを開けませんでした。Windows Terminalをインストールするか、ターミナルで`ytt`を実行してください。"
+        "YuTuTui!はターミナルを開けませんでした。Windows Terminalをインストールするか、ターミナルで`better-ytt`を実行してください。"
     } else {
-        "YuTuTui!はターミナルを開けませんでした。ターミナルを開いて`ytt`を実行してください。"
+        "YuTuTui!はターミナルを開けませんでした。ターミナルを開いて`better-ytt`を実行してください。"
     };
     Err(LaunchError {
         attempts,
@@ -439,7 +439,7 @@ mod tests {
     fn resolve_ytt_path_prefers_executable_sibling() {
         let dir = temp_test_dir("sibling");
         let tray = dir.join("yututray");
-        let ytt = dir.join("ytt");
+        let ytt = dir.join("better-ytt");
         write_executable(&tray);
         write_executable(&ytt);
 
@@ -453,7 +453,7 @@ mod tests {
         let app_dir = temp_test_dir("missing-sibling");
         let bin_dir = temp_test_dir("path");
         let tray = app_dir.join("yututray");
-        let ytt = bin_dir.join("ytt");
+        let ytt = bin_dir.join("better-ytt");
         write_executable(&tray);
         write_executable(&ytt);
 
@@ -470,8 +470,8 @@ mod tests {
     fn macos_platform_candidates_include_home_bins() {
         let home = temp_test_dir("home");
         let candidates: Vec<PathBuf> = platform_ytt_candidates(Some(home.as_os_str())).collect();
-        assert!(candidates.contains(&home.join(".cargo/bin/ytt")));
-        assert!(candidates.contains(&home.join(".local/bin/ytt")));
+        assert!(candidates.contains(&home.join(".cargo/bin/better-ytt")));
+        assert!(candidates.contains(&home.join(".local/bin/better-ytt")));
         let _ = std::fs::remove_dir_all(home);
     }
 

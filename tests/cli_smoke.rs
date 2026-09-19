@@ -11,10 +11,10 @@ const CHILD_TIMEOUT: Duration = Duration::from_secs(10);
 const DESCRIPTOR_TOKEN: &str = "0123456789abcdef0123456789abcdef";
 
 fn run(args: &[&str]) -> std::process::Output {
-    Command::new(env!("CARGO_BIN_EXE_ytt"))
+    Command::new(env!("CARGO_BIN_EXE_better_ytt"))
         .args(args)
         .output()
-        .expect("ytt command should run")
+        .expect("better-ytt command should run")
 }
 
 fn isolated_root(name: &str) -> PathBuf {
@@ -42,7 +42,7 @@ fn isolated_command(root: &Path, args: &[&str]) -> Command {
     }
 
     let user_tag = isolated_user_tag(root);
-    let mut command = Command::new(env!("CARGO_BIN_EXE_ytt"));
+    let mut command = Command::new(env!("CARGO_BIN_EXE_better_ytt"));
     command
         .args(args)
         .env("HOME", root)
@@ -150,19 +150,19 @@ fn run_isolated_with_timeout(root: &Path, args: &[&str]) -> std::process::Output
 
 fn output_with_timeout(mut command: Command, timeout: Duration) -> std::process::Output {
     command.stdout(Stdio::piped()).stderr(Stdio::piped());
-    let mut child = command.spawn().expect("ytt command should spawn");
+    let mut child = command.spawn().expect("better-ytt command should spawn");
     let deadline = Instant::now() + timeout;
     let status = loop {
         match child
             .try_wait()
-            .expect("ytt child status should be readable")
+            .expect("better-ytt child status should be readable")
         {
             Some(status) => break status,
             None if Instant::now() < deadline => std::thread::sleep(Duration::from_millis(10)),
             None => {
                 let _ = child.kill();
                 let _ = child.wait();
-                panic!("ytt command exceeded {timeout:?}");
+                panic!("better-ytt command exceeded {timeout:?}");
             }
         }
     };
@@ -171,13 +171,13 @@ fn output_with_timeout(mut command: Command, timeout: Duration) -> std::process:
     child
         .stdout
         .take()
-        .expect("ytt stdout should be captured")
+        .expect("better-ytt stdout should be captured")
         .read_to_end(&mut stdout)
         .unwrap();
     child
         .stderr
         .take()
-        .expect("ytt stderr should be captured")
+        .expect("better-ytt stderr should be captured")
         .read_to_end(&mut stderr)
         .unwrap();
     std::process::Output {
@@ -243,12 +243,12 @@ fn top_level_help_and_version_exit_before_tui_startup() {
     assert!(help.status.success(), "stderr: {}", stderr(&help));
     let help_out = stdout(&help);
     assert!(help_out.contains("Usage: ytt [OPTIONS]"));
-    assert!(help_out.contains("ytt doctor terminal --json"));
+    assert!(help_out.contains("better-ytt doctor terminal --json"));
     assert!(help_out.contains("--new-instance"));
 
     let version = run(&["--version"]);
     assert!(version.status.success(), "stderr: {}", stderr(&version));
-    assert!(stdout(&version).starts_with("ytt "));
+    assert!(stdout(&version).starts_with("better-ytt "));
 }
 
 #[test]
@@ -263,7 +263,7 @@ fn observational_cli_does_not_create_persistence_roots_or_writer_locks() {
     let output = isolated_command(&root, &["tools", "status"])
         .env("YTM_DATA_DIR", &data)
         .output()
-        .expect("ytt tools status should run read-only");
+        .expect("better-ytt tools status should run read-only");
     assert!(
         matches!(output.status.code(), Some(0) | Some(1)),
         "stdout={}, stderr={}",
@@ -592,7 +592,7 @@ fn personal_data_export_writes_a_private_sanitized_json_file_offline() {
         &["data", "export", "--to", export_dir.to_str().unwrap()],
     )
     .output()
-    .expect("ytt data export should run");
+    .expect("better-ytt data export should run");
     assert!(output.status.success(), "stderr: {}", stderr(&output));
     let out = stdout(&output);
     assert!(out.contains("Exported personal data to"), "{out}");
@@ -762,7 +762,7 @@ fn personal_data_export_recovers_from_a_stale_descriptor_without_deleting_it() {
     )
     .env("USER", USER_TAG)
     .output()
-    .expect("ytt data export should recover from the stale descriptor");
+    .expect("better-ytt data export should recover from the stale descriptor");
 
     assert!(output.status.success(), "stderr: {}", stderr(&output));
     let out = stdout(&output);
@@ -787,7 +787,7 @@ fn doctor_privacy_reports_secret_files_without_tui_startup() {
 
     let output = isolated_command(&root, &["doctor", "privacy"])
         .output()
-        .expect("ytt doctor privacy should run");
+        .expect("better-ytt doctor privacy should run");
     assert!(output.status.success(), "stderr: {}", stderr(&output));
     let out = stdout(&output);
     assert!(out.contains("Privacy-sensitive files"), "{out}");
@@ -797,7 +797,7 @@ fn doctor_privacy_reports_secret_files_without_tui_startup() {
 
     let cleanup = isolated_command(&root, &["doctor", "privacy", "--cleanup"])
         .output()
-        .expect("ytt doctor privacy --cleanup should run");
+        .expect("better-ytt doctor privacy --cleanup should run");
     assert!(cleanup.status.success(), "stderr: {}", stderr(&cleanup));
     assert!(
         stdout(&cleanup).contains("cleanup: removed"),
@@ -844,7 +844,7 @@ fn doctor_terminal_json_reports_capabilities_without_config_or_runtime_startup()
     );
 
     let run_konsole_doctor = |version: &str| {
-        Command::new(env!("CARGO_BIN_EXE_ytt"))
+        Command::new(env!("CARGO_BIN_EXE_better_ytt"))
             .args(["doctor", "terminal", "--json"])
             .env("TERM", "xterm-256color")
             .env("KONSOLE_VERSION", version)
@@ -880,7 +880,7 @@ fn doctor_verbose_reports_full_environment_without_tui_startup() {
 
     let output = isolated_command(&root, &["doctor", "--verbose"])
         .output()
-        .expect("ytt doctor should run");
+        .expect("better-ytt doctor should run");
     assert!(
         matches!(output.status.code(), Some(0) | Some(1)),
         "stdout={}, stderr={}",
@@ -888,7 +888,7 @@ fn doctor_verbose_reports_full_environment_without_tui_startup() {
         stderr(&output)
     );
     let out = stdout(&output);
-    assert!(out.contains("ytt doctor"), "{out}");
+    assert!(out.contains("better-ytt doctor"), "{out}");
     assert!(out.contains("installed via:"), "{out}");
     assert!(out.contains("External tools"), "{out}");
     assert!(out.contains("Managed yt-dlp"), "{out}");
@@ -911,17 +911,17 @@ fn daemon_status_and_stop_fail_cleanly_without_starting_daemon() {
 
     let status = isolated_command(&root, &["daemon", "status"])
         .output()
-        .expect("ytt daemon status should run");
+        .expect("better-ytt daemon status should run");
     assert_eq!(status.status.code(), Some(1));
     assert!(
-        stderr(&status).contains("ytt daemon:"),
+        stderr(&status).contains("better-ytt daemon:"),
         "stderr={}",
         stderr(&status)
     );
 
     let json = isolated_command(&root, &["daemon", "status", "--json"])
         .output()
-        .expect("ytt daemon status --json should run");
+        .expect("better-ytt daemon status --json should run");
     assert_eq!(json.status.code(), Some(1));
     assert!(
         stdout(&json).trim().is_empty(),
@@ -929,17 +929,17 @@ fn daemon_status_and_stop_fail_cleanly_without_starting_daemon() {
         stdout(&json)
     );
     assert!(
-        stderr(&json).contains("ytt daemon:"),
+        stderr(&json).contains("better-ytt daemon:"),
         "stderr={}",
         stderr(&json)
     );
 
     let stop = isolated_command(&root, &["daemon", "stop"])
         .output()
-        .expect("ytt daemon stop should run");
+        .expect("better-ytt daemon stop should run");
     assert_eq!(stop.status.code(), Some(1));
     assert!(
-        stderr(&stop).contains("ytt daemon:"),
+        stderr(&stop).contains("better-ytt daemon:"),
         "stderr={}",
         stderr(&stop)
     );
@@ -953,7 +953,7 @@ fn tools_status_diagnose_unpin_and_reset_use_only_isolated_state() {
 
     let status = isolated_command(&root, &["tools", "status", "--why"])
         .output()
-        .expect("ytt tools status should run");
+        .expect("better-ytt tools status should run");
     assert!(
         matches!(status.status.code(), Some(0) | Some(1)),
         "stdout={}, stderr={}",
@@ -970,7 +970,7 @@ fn tools_status_diagnose_unpin_and_reset_use_only_isolated_state() {
 
     let diagnose = isolated_command(&root, &["tools", "diagnose"])
         .output()
-        .expect("ytt tools diagnose should run");
+        .expect("better-ytt tools diagnose should run");
     assert!(
         diagnose.status.success(),
         "stdout={}, stderr={}",
@@ -996,7 +996,7 @@ fn tools_status_diagnose_unpin_and_reset_use_only_isolated_state() {
 
     let unpin = isolated_command(&root, &["tools", "unpin"])
         .output()
-        .expect("ytt tools unpin should run");
+        .expect("better-ytt tools unpin should run");
     assert!(unpin.status.success(), "stderr={}", stderr(&unpin));
     assert!(
         stdout(&unpin).contains("yt-dlp unpinned"),
@@ -1006,7 +1006,7 @@ fn tools_status_diagnose_unpin_and_reset_use_only_isolated_state() {
 
     let reset = isolated_command(&root, &["tools", "reset", "--playback"])
         .output()
-        .expect("ytt tools reset should run");
+        .expect("better-ytt tools reset should run");
     assert!(
         matches!(reset.status.code(), Some(0) | Some(1)),
         "stdout={}, stderr={}",
@@ -1030,13 +1030,13 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
 
     let jobs = isolated_command(&root, &["transfer", "jobs"])
         .output()
-        .expect("ytt transfer jobs should run");
+        .expect("better-ytt transfer jobs should run");
     assert!(jobs.status.success(), "stderr={}", stderr(&jobs));
     assert_eq!(stdout(&jobs).trim(), "No transfer jobs.");
 
     let list_ytm = isolated_command(&root, &["transfer", "list", "ytm"])
         .output()
-        .expect("ytt transfer list ytm should run");
+        .expect("better-ytt transfer list ytm should run");
     assert_eq!(list_ytm.status.code(), Some(1));
     assert!(
         stderr(&list_ytm).contains("YouTube Music cookie"),
@@ -1048,7 +1048,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
     let backup_dir_arg = backup_dir.to_string_lossy().into_owned();
     let backup = isolated_command(&root, &["transfer", "backup", "--dir", &backup_dir_arg])
         .output()
-        .expect("ytt transfer backup should run");
+        .expect("better-ytt transfer backup should run");
     assert_eq!(backup.status.code(), Some(1));
     assert!(
         stderr(&backup).contains("YouTube Music cookie"),
@@ -1074,7 +1074,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
         ],
     )
     .output()
-    .expect("ytt transfer import should run");
+    .expect("better-ytt transfer import should run");
     assert_eq!(import.status.code(), Some(1));
     assert!(
         stderr(&import).contains("Spotify"),
@@ -1084,7 +1084,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
 
     let resume = isolated_command(&root, &["transfer", "resume", "missing-job", "--yes"])
         .output()
-        .expect("ytt transfer resume should run");
+        .expect("better-ytt transfer resume should run");
     assert_eq!(resume.status.code(), Some(1));
     assert!(
         stderr(&resume).contains("missing-job"),
@@ -1094,7 +1094,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
 
     let listenbrainz = isolated_command(&root, &["auth", "listenbrainz"])
         .output()
-        .expect("ytt auth listenbrainz should run");
+        .expect("better-ytt auth listenbrainz should run");
     assert_eq!(listenbrainz.status.code(), Some(1));
     assert!(
         stderr(&listenbrainz).contains("missing token"),
@@ -1104,7 +1104,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
 
     let spotify_status = isolated_command(&root, &["auth", "spotify", "--status"])
         .output()
-        .expect("ytt auth spotify --status should run");
+        .expect("better-ytt auth spotify --status should run");
     assert_eq!(spotify_status.status.code(), Some(1));
     assert!(
         stderr(&spotify_status).contains("Spotify"),
@@ -1114,7 +1114,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
 
     let spotify_blank_client = isolated_command(&root, &["auth", "spotify", "--client-id", "   "])
         .output()
-        .expect("ytt auth spotify blank client should run");
+        .expect("better-ytt auth spotify blank client should run");
     assert_eq!(spotify_blank_client.status.code(), Some(1));
     assert!(
         stderr(&spotify_blank_client).contains("no Client ID configured"),
@@ -1124,7 +1124,7 @@ fn transfer_and_auth_one_shots_report_setup_failures_without_tui_startup() {
 
     let spotify_logout = isolated_command(&root, &["auth", "spotify", "--logout"])
         .output()
-        .expect("ytt auth spotify logout should run");
+        .expect("better-ytt auth spotify logout should run");
     assert!(
         spotify_logout.status.success(),
         "stderr={}",
@@ -1159,7 +1159,7 @@ fn new_remote_commands_fail_cleanly_without_an_owner() {
         );
         assert!(stdout(&output).is_empty(), "{args:?}: unexpected stdout");
         assert!(
-            stderr(&output).contains("ytt -r:"),
+            stderr(&output).contains("better-ytt -r:"),
             "{args:?}: stderr={}",
             stderr(&output)
         );
@@ -1194,7 +1194,7 @@ fn new_remote_parser_rejects_bad_arity_before_connecting() {
         );
         assert!(stdout(&output).is_empty(), "{args:?}: unexpected stdout");
         assert!(
-            stderr(&output).contains("ytt -r:"),
+            stderr(&output).contains("better-ytt -r:"),
             "{args:?}: stderr={}",
             stderr(&output)
         );
@@ -1304,7 +1304,7 @@ mod remote_owner {
                             .expect("fake owner should read ytt request");
                     }
                     let request: RemoteRequest = serde_json::from_str(request_line.trim())
-                        .expect("ytt should send a valid one-shot request");
+                        .expect("better-ytt should send a valid one-shot request");
                     assert_eq!(request.version, PROTOCOL_VERSION);
                     assert_eq!(request.token, DESCRIPTOR_TOKEN);
                     assert_eq!(request.command, exchange.command);
@@ -1371,7 +1371,7 @@ mod remote_owner {
                     .expect("timed out reading watch Hello")
                     .expect("fake watch owner should read Hello");
                 let hello: HelloRequest =
-                    serde_json::from_str(line.trim()).expect("ytt watch should send a valid Hello");
+                    serde_json::from_str(line.trim()).expect("better-ytt watch should send a valid Hello");
                 assert_eq!(hello.version, PROTOCOL_VERSION);
                 assert_eq!(hello.token, DESCRIPTOR_TOKEN);
                 assert_eq!(hello.hello.client, "ytt-cli-watch");
@@ -1396,7 +1396,7 @@ mod remote_owner {
                     .expect("timed out reading watch subscription")
                     .expect("fake watch owner should read subscription");
                 let subscribe: ClientFrame = serde_json::from_str(line.trim())
-                    .expect("ytt watch should send a valid subscription");
+                    .expect("better-ytt watch should send a valid subscription");
                 assert_eq!(subscribe.id, 1);
                 assert_eq!(
                     subscribe.op,
