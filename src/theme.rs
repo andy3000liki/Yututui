@@ -63,7 +63,9 @@ impl Eq for ThemeConfig {}
 impl Default for ThemeConfig {
     fn default() -> Self {
         Self {
-            preset: ThemePreset::Default.id().to_owned(),
+            // Zegon fork: ship the Tokyo Night look out of the box instead of
+            // the plain Default preset — better first-run appearance.
+            preset: ThemePreset::TokyoNight.id().to_owned(),
             overrides: BTreeMap::new(),
             custom_overrides: BTreeMap::new(),
             palette: OnceLock::new(),

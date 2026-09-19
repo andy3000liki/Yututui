@@ -89,7 +89,8 @@ fn alt_shift_r_confirms_dedicated_radio_mode() {
     );
     confirm_pending_radio_mode_and_admit(&mut app);
     assert!(!app.radio_dedicated_mode);
-    assert_eq!(app.theme.preset, "default");
+    // Zegon fork: the out-of-box preset is Tokyo Night (see ThemeConfig::default).
+    assert_eq!(app.theme.preset, "tokyo_night");
     assert!(
         !app.search_config_for_mode()
             .selectable_sources()
