@@ -26,3 +26,15 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Build ytt
         run: cargo build --locked
+
+  compile-arch:
+    name: cargo build (archlinux container)
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Arch deps
+        run: pacman -Syu --noconfirm --needed base-devel openssl pkg-config rust
+      - name: Build ytt on Arch
+        run: cargo build --locked
