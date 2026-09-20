@@ -365,14 +365,15 @@ impl AiActor {
             }
             let Some(content) = resp.content().cloned() else {
                 let service = self.client.service_label();
-                self.emit(AiEvent::Error(
-                    format!(crate::t!(
-                        "Empty response from {}.",
-                        "{} 응답이 비어 있어요.",
-                        "{}の応答が空です。"
-                    ), service)
-                    .to_owned(),
-                ));
+                self.emit(AiEvent::Error(match crate::i18n::current() {
+                    crate::i18n::Language::Korean => {
+                        format!("{service} 응답이 비어 있어요.")
+                    }
+                    crate::i18n::Language::Japanese => {
+                        format!("{service}の応答が空です。")
+                    }
+                    _ => format!("Empty response from {service}."),
+                }));
                 return;
             };
 
