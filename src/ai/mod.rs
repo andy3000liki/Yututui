@@ -48,8 +48,6 @@ use actor::{
 #[cfg(test)]
 use client::GeminiClient;
 #[cfg(test)]
-use openai::AiClient;
-#[cfg(test)]
 use context::context_summary;
 #[cfg(test)]
 use std::collections::VecDeque;
