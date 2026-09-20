@@ -107,7 +107,7 @@ fn ai_handle_sends_each_command_without_mutating_payloads() {
 #[test]
 fn spawn_rejects_keys_that_cannot_be_sent_as_headers() {
     assert!(
-        spawn("bad\r\nkey", GeminiModel::FlashLite, |_| {}).is_none(),
+        spawn("bad\r\nkey", GeminiModel::FlashLite, AiProvider::Gemini, |_| {}).is_none(),
         "invalid header bytes must fail before an actor is spawned"
     );
 }
