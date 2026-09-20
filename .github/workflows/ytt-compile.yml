@@ -52,7 +52,7 @@ jobs:
           if-no-files-found: error
 
   ai-tests:
-    name: cargo test ai:: (ubuntu-latest)
+    name: "cargo test ai:: (ubuntu-latest)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,4 +61,4 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Run AI module tests
-        run: cargo test --locked -- ai::
+        run: "cargo test --locked -- ai::"
