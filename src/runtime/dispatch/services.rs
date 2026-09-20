@@ -263,10 +263,16 @@ impl RuntimeHandles {
         app: &mut App,
         key: Option<String>,
         model: crate::ai::GeminiModel,
+        provider: crate::ai::AiProvider,
         assistant_enabled: bool,
     ) {
         self.ai_handle = key.and_then(|k| {
-            crate::ai::spawn(&k, model, sink(self.worker_tx.clone(), RuntimeEvent::Ai))
+            crate::ai::spawn(
+                &k,
+                model,
+                provider,
+                sink(self.worker_tx.clone(), RuntimeEvent::Ai),
+            )
         });
         app.ai.available = assistant_enabled && self.ai_handle.is_some();
     }

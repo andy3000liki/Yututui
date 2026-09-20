@@ -406,6 +406,7 @@ impl App {
             cmds.push(Cmd::ReloadAi {
                 key: self.config.effective_ai_service_key(),
                 model: self.ai.model,
+                provider: self.config.effective_ai_provider(),
                 assistant_enabled: self.config.effective_ai_enabled(),
             });
             if key_changed || romanized_changed {

@@ -214,8 +214,9 @@ impl RuntimeHandles {
             Cmd::ReloadAi {
                 key,
                 model,
+                provider,
                 assistant_enabled,
-            } => self.handle_ai_reload(app, key, model, assistant_enabled),
+            } => self.handle_ai_reload(app, key, model, provider, assistant_enabled),
             Cmd::Scrobble(scrobble) => self.dispatch_scrobble(app, scrobble),
             Cmd::Transfer(cmd) => self.dispatch_transfer(app, cmd),
             Cmd::Atlas(cmd) => self.dispatch_atlas(app, cmd),

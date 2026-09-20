@@ -32,7 +32,7 @@ fn romanize_item(key: &str, title: &str, artist: &str) -> RomanizeItem {
 
 fn test_actor() -> AiActor {
     AiActor {
-        client: GeminiClient::new("test-key").unwrap(),
+        client: AiClient::Gemini(GeminiClient::new("test-key").unwrap()),
         model: GeminiModel::FlashLite,
         emit: Arc::new(|_| {}),
         call_times: VecDeque::new(),

@@ -525,10 +525,7 @@ pub(crate) fn settings_model(view: &CoreView<'_>, rev: u64) -> super::proto::Set
     let c = view.config;
     let audio = c.audio.runtime();
     let anim = &c.animations;
-    let has_key = std::env::var_os("GEMINI_API_KEY").is_some_and(|v| !v.is_empty())
-        || c.gemini_api_key
-            .as_deref()
-            .is_some_and(|key| !key.trim().is_empty());
+    let has_key = c.effective_provider_api_key().is_some();
     let long_form_seek = (view.owner_mode == InstanceMode::Daemon).then(|| {
         let requested = c.audio.mpv.long_form_seek_optimization;
         let (effective, reason) = view.long_form_seek_status.map_or(

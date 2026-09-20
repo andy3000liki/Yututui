@@ -50,3 +50,15 @@ jobs:
           name: better-ytt-arch
           path: target/debug/better-ytt
           if-no-files-found: error
+
+  ai-tests:
+    name: cargo test ai:: (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Run AI module tests
+        run: cargo test --locked -- ai::

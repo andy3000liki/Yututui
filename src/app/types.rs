@@ -492,6 +492,7 @@ pub enum Cmd {
     ReloadAi {
         key: Option<String>,
         model: GeminiModel,
+        provider: crate::ai::AiProvider,
         assistant_enabled: bool,
     },
     /// Last.fm owner controls (browser auth and live settings reconfiguration).

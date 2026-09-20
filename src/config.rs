@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::safe_fs;
 
-use crate::ai::GeminiModel;
+use crate::ai::{AiProvider, AiProviderKind, GeminiModel, OpenAiPreset};
 use crate::eq::{self, EqPreset};
 use crate::i18n::{DjGemLanguage, Language};
 use crate::queue::Repeat;
@@ -381,6 +381,25 @@ pub struct Config {
     /// Google Gemini API key. The `GEMINI_API_KEY` env var overrides this when set.
     pub gemini_api_key: Option<String>,
     pub gemini_model: GeminiModel,
+    /// Which assistant backend DJ Gem uses: Gemini, or any OpenAI-compatible
+    /// `/chat/completions` endpoint (OpenAI, xAI, OpenCode via proxy, Ollama, ...).
+    /// Absent in older configs → default (Gemini), so existing setups keep working
+    /// untouched.
+    #[serde(default)]
+    pub ai_provider: AiProviderKind,
+    /// Preset endpoint for the OpenAI-compatible backend (default base URL + model
+    /// + display label). `openai_base_url`/`openai_model` below override either.
+    #[serde(default)]
+    pub openai_preset: OpenAiPreset,
+    /// Custom OpenAI-compatible base URL (e.g. `http://localhost:11434/v1`).
+    /// Overrides the preset default when set.
+    pub openai_base_url: Option<String>,
+    /// API key for the OpenAI-compatible backend. The `OPENAI_API_KEY` env var
+    /// overrides this when set (use it for xAI keys too).
+    pub openai_api_key: Option<String>,
+    /// Model name for the OpenAI-compatible backend (e.g. `gpt-4o-mini`, `grok-4`).
+    /// Falls back to the preset default when unset.
+    pub openai_model: Option<String>,
     /// Whether the DJ Gem assistant is enabled. `None` → on, so existing configs that already hold
     /// a key keep DJ Gem working. Lets the user switch DJ Gem off while keeping the key saved.
     pub ai_enabled: Option<bool>,
@@ -567,6 +586,7 @@ pub struct DownloadRuntimeConfig {
 pub struct AiRuntimeConfig {
     pub key: Option<String>,
     pub model: GeminiModel,
+    pub provider: AiProvider,
     pub assistant_enabled: bool,
 }
 
@@ -607,6 +627,11 @@ impl Default for Config {
             animations: AnimationsConfig::default(),
             gemini_api_key: None,
             gemini_model: GeminiModel::default(),
+            ai_provider: AiProviderKind::default(),
+            openai_preset: OpenAiPreset::default(),
+            openai_base_url: None,
+            openai_api_key: None,
+            openai_model: None,
             ai_enabled: None,
             romanized_titles: None,
             dj_gem_language: DjGemLanguage::default(),
@@ -653,6 +678,7 @@ impl Config {
         AiRuntimeConfig {
             key: self.effective_ai_service_key(),
             model: self.effective_gemini_model(),
+            provider: self.effective_ai_provider(),
             assistant_enabled: self.effective_ai_enabled(),
         }
     }
@@ -984,9 +1010,70 @@ impl Config {
             .filter(|k| !k.is_empty())
     }
 
-    /// The Gemini model the assistant uses.
+    /// The Gemini model the assistant uses (Gemini backend only; the
+    /// OpenAI-compatible backend carries its own model string).
     pub fn effective_gemini_model(&self) -> GeminiModel {
         self.gemini_model
+    }
+
+    /// The OpenAI-compatible API key to use. The `OPENAI_API_KEY` env var wins over
+    /// the config value (use it for xAI keys too); whitespace is trimmed and an
+    /// empty result is treated as unset (`None`).
+    pub fn effective_openai_api_key(&self) -> Option<String> {
+        if let Ok(env) = std::env::var("OPENAI_API_KEY") {
+            let trimmed = env.trim();
+            if !trimmed.is_empty() {
+                return Some(trimmed.to_owned());
+            }
+        }
+        self.openai_api_key
+            .as_ref()
+            .map(|k| k.trim().to_owned())
+            .filter(|k| !k.is_empty())
+    }
+
+    /// The OpenAI-compatible base URL: explicit `openai_base_url` wins, otherwise
+    /// the preset default.
+    pub fn effective_openai_base_url(&self) -> String {
+        self.openai_base_url
+            .as_ref()
+            .map(|u| u.trim().to_owned())
+            .filter(|u| !u.is_empty())
+            .unwrap_or_else(|| self.openai_preset.default_base_url().to_owned())
+    }
+
+    /// The OpenAI-compatible model name: explicit `openai_model` wins, otherwise
+    /// the preset default.
+    pub fn effective_openai_model(&self) -> String {
+        self.openai_model
+            .as_ref()
+            .map(|m| m.trim().to_owned())
+            .filter(|m| !m.is_empty())
+            .unwrap_or_else(|| self.openai_preset.default_model().to_owned())
+    }
+
+    /// The active backend's API key, without any enabled gating (callers that gate
+    /// on DJ Gem / romanization themselves use this).
+    pub fn effective_provider_api_key(&self) -> Option<String> {
+        match self.ai_provider {
+            AiProviderKind::Gemini => self.effective_gemini_api_key(),
+            AiProviderKind::OpenAi => self.effective_openai_api_key(),
+        }
+    }
+
+    /// The resolved assistant backend (preset defaults applied).
+    pub fn effective_ai_provider(&self) -> AiProvider {
+        match self.ai_provider {
+            AiProviderKind::Gemini => AiProvider::Gemini,
+            AiProviderKind::OpenAi => {
+                use crate::ai::OpenAiConfig;
+                AiProvider::OpenAi(OpenAiConfig {
+                    base_url: self.effective_openai_base_url(),
+                    model: self.effective_openai_model(),
+                    service_label: self.openai_preset.label(),
+                })
+            }
+        }
     }
 
     /// Whether the DJ Gem assistant is enabled (default on). When off, [`Self::effective_ai_key`]
@@ -995,12 +1082,13 @@ impl Config {
         self.ai_enabled.unwrap_or(true)
     }
 
-    /// The DJ Gem key to actually use: the effective Gemini key, but only while DJ Gem is enabled.
+    /// The DJ Gem key to actually use: the active backend's key, but only while DJ Gem
+    /// is enabled.
     /// `None` when DJ Gem is switched off — the lever the settings toggle pulls to disable DJ Gem
     /// without discarding the saved key.
     pub fn effective_ai_key(&self) -> Option<String> {
         if self.effective_ai_enabled() {
-            self.effective_gemini_api_key()
+            self.effective_provider_api_key()
         } else {
             None
         }
@@ -1011,11 +1099,11 @@ impl Config {
         self.romanized_titles.unwrap_or(false)
     }
 
-    /// The Gemini key needed by any Gemini-backed feature. DJ Gem can be off while title
+    /// The backend key needed by any assistant-backed feature. DJ Gem can be off while title
     /// romanization remains on, so actor lifetime is gated by this broader service key.
     pub fn effective_ai_service_key(&self) -> Option<String> {
         if self.effective_ai_enabled() || self.effective_romanized_titles() {
-            self.effective_gemini_api_key()
+            self.effective_provider_api_key()
         } else {
             None
         }

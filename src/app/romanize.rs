@@ -38,12 +38,12 @@ impl App {
 
         let mut cmds = Vec::new();
         let mut dirty_cache = false;
-        let gemini_available = self.config.effective_gemini_api_key().is_some();
+        let llm_available = self.config.effective_provider_api_key().is_some();
         let mut items = Vec::new();
 
         for song in songs {
             dirty_cache |= self.romanization.cache.ensure_local(song);
-            if !gemini_available {
+            if !llm_available {
                 continue;
             }
             let Some(item) = self.romanization.cache.gemini_candidate(song) else {

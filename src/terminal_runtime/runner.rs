@@ -665,12 +665,13 @@ pub async fn run(
         player_runtime.cookies_file.clone(),
     );
 
-    // Gemini actor: spawned when any Gemini-backed feature is active. DJ Gem can be off while
+    // Assistant actor: spawned when any assistant-backed feature is active. DJ Gem can be off while
     // title romanization is on, so UI assistant availability is tracked separately below.
     let ai_handle = ai_runtime.key.as_deref().and_then(|key| {
         ai::spawn(
             key,
             ai_runtime.model,
+            ai_runtime.provider.clone(),
             runtime::sink(worker_tx.clone(), RuntimeEvent::Ai),
         )
     });

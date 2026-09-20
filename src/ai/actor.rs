@@ -22,6 +22,7 @@ use super::client::{
 use super::context::context_summary;
 use super::dto::{AiContext, AiPick};
 use super::model::GeminiModel;
+use super::openai::{AiClient, AiProvider, OpenAiClient};
 use super::model_control::{self, ModelUpdateReceiver, ModelUpdateSender};
 use super::protocol::{AiCmd, AiEvent, EventSink};
 use super::structured::{
@@ -128,12 +129,26 @@ impl AiHandle {
     }
 }
 
-/// Spawn the Gemini actor. Returns `None` if the key can't form a valid header.
-pub fn spawn<F>(api_key: &str, model: GeminiModel, emit: F) -> Option<AiHandle>
+/// Spawn the DJ Gem actor for either backend. Returns `None` if the key can't form
+/// a valid header (or the OpenAI-compatible endpoint/model is unusable).
+/// `model` drives Gemini model fallback and the settings hot-swap slot; the
+/// OpenAI-compatible backend carries its own model string and ignores it.
+pub fn spawn<F>(
+    api_key: &str,
+    model: GeminiModel,
+    provider: AiProvider,
+    emit: F,
+) -> Option<AiHandle>
 where
     F: Fn(AiEvent) + Send + Sync + 'static,
 {
-    let client = GeminiClient::new(api_key).ok()?;
+    let client = match &provider {
+        AiProvider::Gemini => AiClient::Gemini(GeminiClient::new(api_key).ok()?),
+        AiProvider::OpenAi(cfg) => AiClient::OpenAi(
+            OpenAiClient::new(&cfg.base_url, api_key, cfg.model.clone(), cfg.service_label)
+                .ok()?,
+        ),
+    };
     let (tx, rx) = crate::util::backpressure::bounded_channel(crate::util::backpressure::AI_QUEUE);
     let (model_updates, model_rx) = model_control::channel(model);
     let actor = AiActor {
@@ -148,7 +163,7 @@ where
 }
 
 pub(super) struct AiActor {
-    pub(super) client: GeminiClient,
+    pub(super) client: AiClient,
     pub(super) model: GeminiModel,
     pub(super) emit: EventSink,
     /// Timestamps of recent Gemini calls, for the rate limiter.
@@ -244,8 +259,10 @@ impl AiActor {
         self.call_times.push_back(Instant::now());
     }
 
-    /// One Gemini call, falling back to a cheaper/older model on a fallbackable error —
-    /// but only while no side effect has happened yet.
+    /// One backend call, falling back to a cheaper/older Gemini model on a
+    /// fallbackable error — but only while no side effect has happened yet, and only
+    /// on the Gemini backend (the OpenAI-compatible backend has a single model, so
+    /// its client already retried internally and there is nothing to fall back to).
     async fn generate(
         &mut self,
         req: &GenerateContentRequest,
@@ -259,6 +276,7 @@ impl AiActor {
                 Err(e) => {
                     if !side_effected
                         && e.is_model_fallbackable()
+                        && matches!(self.client, AiClient::Gemini(_))
                         && let Some(fb) = model.fallback()
                     {
                         tracing::warn!(from = model.label(), to = fb.label(), error = %e, "DJ Gem model fallback");
@@ -318,7 +336,9 @@ impl AiActor {
                 Err(e) => {
                     // The transcript gets the short human line; the log keeps the body.
                     tracing::warn!(error = %e, "DJ Gem chat request failed");
-                    self.emit(AiEvent::Error(e.user_message()));
+                    self.emit(AiEvent::Error(
+                        e.user_message_for(self.client.service_label()),
+                    ));
                     return;
                 }
             };
@@ -344,12 +364,13 @@ impl AiActor {
                 return;
             }
             let Some(content) = resp.content().cloned() else {
+                let service = self.client.service_label();
                 self.emit(AiEvent::Error(
-                    crate::t!(
-                        "Empty response from Gemini.",
-                        "Gemini 응답이 비어 있어요.",
-                        "Geminiの応答が空です。"
-                    )
+                    format!(crate::t!(
+                        "Empty response from {}.",
+                        "{} 응답이 비어 있어요.",
+                        "{}の応答が空です。"
+                    ), service)
                     .to_owned(),
                 ));
                 return;

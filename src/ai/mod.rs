@@ -1,4 +1,8 @@
-//! The DJ Gem assistant: a multi-turn Gemini function-calling agent that drives playback.
+//! The DJ Gem assistant: a multi-turn function-calling agent that drives playback.
+//!
+//! Two backends speak the same internal protocol: Google Gemini (`client`) and any
+//! OpenAI-compatible chat endpoint (`openai` — OpenAI, xAI, OpenCode via proxy,
+//! Ollama, ...). The loop below never knows which service answered.
 //!
 //! Mirrors `youtube-music-cli`'s LLM service, adapted to the dual-owner architecture: the
 //! actor cannot touch either owner, so tool side-effects flow back as [`AiEvent`]s for the
@@ -22,12 +26,14 @@ mod context;
 mod dto;
 pub mod model;
 mod model_control;
+pub mod openai;
 mod protocol;
 mod structured;
 pub mod tools;
 pub mod usage;
 
 pub use actor::{AiHandle, spawn};
+pub use openai::{AiClient, AiProvider, AiProviderKind, OpenAiConfig, OpenAiPreset};
 pub use dto::{AiContext, AiPick, PlaylistInfo};
 pub use model::GeminiModel;
 pub use protocol::{AiCmd, AiEvent};
@@ -41,6 +47,8 @@ use actor::{
 };
 #[cfg(test)]
 use client::GeminiClient;
+#[cfg(test)]
+use openai::AiClient;
 #[cfg(test)]
 use context::context_summary;
 #[cfg(test)]

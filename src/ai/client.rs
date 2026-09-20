@@ -280,6 +280,24 @@ impl GeminiError {
     /// error is mined for Google's own `error.message` (with the invalid-key case folded
     /// into the key guidance) and firmly truncated.
     pub fn user_message(&self) -> String {
+        self.user_message_for("Gemini")
+    }
+
+    /// [`Self::user_message`] with the service name swapped for a non-Gemini backend
+    /// (`OpenAiClient` reports through the same error type so the actor's retry
+    /// handling applies unchanged). Implemented as a rename pass because every
+    /// `Gemini` mention in these strings is the service proper noun — safe to swap
+    /// for `OpenAI`/`xAI`/`OpenCode`/`Custom` in all three UI languages.
+    pub fn user_message_for(&self, service: &str) -> String {
+        let msg = self.user_message_inner();
+        if service == "Gemini" {
+            msg
+        } else {
+            msg.replace("Gemini", service)
+        }
+    }
+
+    fn user_message_inner(&self) -> String {
         let key_help = || {
             crate::t!(
                 "The Gemini API key was rejected — check it in Settings.",

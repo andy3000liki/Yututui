@@ -117,11 +117,12 @@ impl App {
                         });
                     cmds.push(Cmd::ReloadAi {
                         key: if ai_on || romanized_on {
-                            self.config.effective_gemini_api_key()
+                            self.config.effective_provider_api_key()
                         } else {
                             None
                         },
                         model: self.ai.model,
+                        provider: self.config.effective_ai_provider(),
                         assistant_enabled: ai_on,
                     });
                     cmds.extend(self.request_current_surfaces_romanization());
